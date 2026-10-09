@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 
+	"nexus-video-games/internal/delivery/http/middleware"
 	"nexus-video-games/internal/model"
 
 	"github.com/gin-gonic/gin"
@@ -19,6 +20,7 @@ func NewGin(viper *viper.Viper) *gin.Engine {
 	router := gin.New()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
+	router.Use(middleware.CORSMiddleware())
 	router.Use(NewErrorHandler())
 
 	return router
