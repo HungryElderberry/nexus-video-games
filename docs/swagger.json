@@ -1,0 +1,1106 @@
+{
+    "schemes": [
+        "http",
+        "https"
+    ],
+    "swagger": "2.0",
+    "info": {
+        "description": "High-performance backend API featuring video games catalog, in-game wallet, Xendit payment gateway, Resend email alerts, and single-game session enforcement.",
+        "title": "Nexus Video Games REST API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/api/v1/auth/login": {
+            "post": {
+                "description": "Logs into account, returns Bearer token, and triggers security notification email.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Authenticate user and generate JWT",
+                "parameters": [
+                    {
+                        "description": "User Login Credentials",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.LoginUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-nexus-video-games_internal_model_LoginResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-any"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/logout": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Invalidates client-side session.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Sign out of the system",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-any"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/register": {
+            "post": {
+                "description": "Creates a new user record and dispatches an email verification link via Resend.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Register a new user account",
+                "parameters": [
+                    {
+                        "description": "User Registration Payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.RegisterUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-nexus-video-games_internal_model_UserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-any"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/reset-password": {
+            "post": {
+                "description": "Sets a new password using the reset token provided in the login notification email.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Reset forgotten or compromised password",
+                "parameters": [
+                    {
+                        "description": "Password Reset Payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.ResetPasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-any"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/verify": {
+            "get": {
+                "description": "Validates the email token clicked from the Resend email message.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Verify user email address",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Email verification token",
+                        "name": "token",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-any"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/balances": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns wallet amount in minor units (IDR) for the authenticated player.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Balances \u0026 Payments"
+                ],
+                "summary": "Get current in-game wallet balance",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-nexus-video-games_internal_model_BalanceResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-any"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-any"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/balances/topup": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Generates a checkout URL where the player can simulate or complete payment.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Balances \u0026 Payments"
+                ],
+                "summary": "Create Xendit invoice for wallet top-up",
+                "parameters": [
+                    {
+                        "description": "Top-up Amount",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.TopupBalanceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-nexus-video-games_internal_model_TopupResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-any"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-any"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-any"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/dashboard": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Calculates user wallet balance, owned games count, lifetime spending, monthly spending, and games played in the current month.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Get player dashboard metrics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-nexus-video-games_internal_model_DashboardStatsResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-any"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-any"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/games/buy": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Deducts game price from user wallet and grants game ownership.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Games"
+                ],
+                "summary": "Purchase a game using wallet balance",
+                "parameters": [
+                    {
+                        "description": "External Game ID to purchase",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.BuyGameRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-any"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-any"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/games/explore": {
+            "get": {
+                "description": "Retrieves games cached from IsThereAnyDeal available for wallet purchase.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Games"
+                ],
+                "summary": "List all available games in catalog",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-array_nexus-video-games_internal_model_GameCatalogItemResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-any"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/games/library": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Lists all acquired games along with logged playtime.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Games"
+                ],
+                "summary": "Get games owned by authenticated user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-array_nexus-video-games_internal_model_UserGameLibraryResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-any"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-any"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/games/sync": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Pulls live game deals and upserts records into PostgreSQL games_catalog.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Games"
+                ],
+                "summary": "Synchronize catalog from IsThereAnyDeal API",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-any"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-any"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sessions/active": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns details of the currently running session and countdown to expiry.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Game Sessions"
+                ],
+                "summary": "Check current active playing session",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-nexus-video-games_internal_model_ActiveSessionResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-any"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-any"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sessions/launch/{game_id}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Verifies ownership, enforces single-game active session rule (with 60-second auto-expiry), and provides game redirect route.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Game Sessions"
+                ],
+                "summary": "Launch a game and start active playing session",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "External Game ID",
+                        "name": "game_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-nexus-video-games_internal_model_LaunchGameResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-any"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-any"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-any"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/users/me": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Fetches the profile details of the user identified by the Bearer token.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Get current authenticated user profile",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-nexus-video-games_internal_model_UserResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-any"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-any"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/webhooks/xendit": {
+            "post": {
+                "description": "Processes payment settlement notifications, credits player wallet, and triggers email receipt.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Balances \u0026 Payments"
+                ],
+                "summary": "Handle incoming payment webhooks from Xendit",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Xendit Webhook Verification Token",
+                        "name": "x-callback-token",
+                        "in": "header"
+                    },
+                    {
+                        "description": "Xendit Webhook Payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.XenditInvoiceWebhookPayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-any"
+                        }
+                    }
+                }
+            }
+        },
+        "/games/{slug}": {
+            "get": {
+                "description": "Destination route for game launching.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Game Sessions"
+                ],
+                "summary": "Simulated game streaming route",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Game Slug / External Game ID",
+                        "name": "slug",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/nexus-video-games_internal_model.WebResponse-string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "nexus-video-games_internal_model.ActiveSessionResponse": {
+            "type": "object",
+            "properties": {
+                "expires_at": {
+                    "type": "string"
+                },
+                "external_game_id": {
+                    "type": "string"
+                },
+                "games_owned_id": {
+                    "type": "string"
+                },
+                "seconds_left": {
+                    "type": "integer"
+                },
+                "started_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "nexus-video-games_internal_model.BalanceResponse": {
+            "type": "object",
+            "properties": {
+                "balance_amount": {
+                    "type": "integer"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "nexus-video-games_internal_model.BuyGameRequest": {
+            "type": "object",
+            "required": [
+                "external_game_id"
+            ],
+            "properties": {
+                "external_game_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "nexus-video-games_internal_model.DashboardStatsResponse": {
+            "type": "object",
+            "properties": {
+                "currency": {
+                    "type": "string"
+                },
+                "current_balance": {
+                    "type": "integer"
+                },
+                "monthly_cash_spent": {
+                    "type": "integer"
+                },
+                "monthly_games_played": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/nexus-video-games_internal_model.MonthlyGamePlayResponse"
+                    }
+                },
+                "total_cash_spent": {
+                    "type": "integer"
+                },
+                "total_games_owned": {
+                    "type": "integer"
+                }
+            }
+        },
+        "nexus-video-games_internal_model.GameCatalogItemResponse": {
+            "type": "object",
+            "properties": {
+                "external_game_id": {
+                    "type": "string"
+                },
+                "is_available": {
+                    "type": "boolean"
+                },
+                "price_in_balance": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "nexus-video-games_internal_model.LaunchGameResponse": {
+            "type": "object",
+            "properties": {
+                "expires_at": {
+                    "type": "string"
+                },
+                "game_title": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "redirect_url": {
+                    "type": "string"
+                },
+                "session_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "nexus-video-games_internal_model.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/nexus-video-games_internal_model.UserResponse"
+                }
+            }
+        },
+        "nexus-video-games_internal_model.LoginUserRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "nexus-video-games_internal_model.MonthlyGamePlayResponse": {
+            "type": "object",
+            "properties": {
+                "external_game_id": {
+                    "type": "string"
+                },
+                "playtime_minutes": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "nexus-video-games_internal_model.RegisterUserRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 8
+                }
+            }
+        },
+        "nexus-video-games_internal_model.ResetPasswordRequest": {
+            "type": "object",
+            "required": [
+                "new_password",
+                "token"
+            ],
+            "properties": {
+                "new_password": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 8
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "nexus-video-games_internal_model.TopupBalanceRequest": {
+            "type": "object",
+            "required": [
+                "amount"
+            ],
+            "properties": {
+                "amount": {
+                    "description": "Minimum Topup IDR 10k",
+                    "type": "integer",
+                    "minimum": 10000
+                }
+            }
+        },
+        "nexus-video-games_internal_model.TopupResponse": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "integer"
+                },
+                "checkout_url": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "invoice_id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "nexus-video-games_internal_model.UserGameLibraryResponse": {
+            "type": "object",
+            "properties": {
+                "acquired_at": {
+                    "type": "string"
+                },
+                "external_game_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "playtime_minutes": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "nexus-video-games_internal_model.UserResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_verified": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "nexus-video-games_internal_model.WebResponse-any": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "errors": {
+                    "type": "string"
+                }
+            }
+        },
+        "nexus-video-games_internal_model.WebResponse-array_nexus-video-games_internal_model_GameCatalogItemResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/nexus-video-games_internal_model.GameCatalogItemResponse"
+                    }
+                },
+                "errors": {
+                    "type": "string"
+                }
+            }
+        },
+        "nexus-video-games_internal_model.WebResponse-array_nexus-video-games_internal_model_UserGameLibraryResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/nexus-video-games_internal_model.UserGameLibraryResponse"
+                    }
+                },
+                "errors": {
+                    "type": "string"
+                }
+            }
+        },
+        "nexus-video-games_internal_model.WebResponse-nexus-video-games_internal_model_ActiveSessionResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/nexus-video-games_internal_model.ActiveSessionResponse"
+                },
+                "errors": {
+                    "type": "string"
+                }
+            }
+        },
+        "nexus-video-games_internal_model.WebResponse-nexus-video-games_internal_model_BalanceResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/nexus-video-games_internal_model.BalanceResponse"
+                },
+                "errors": {
+                    "type": "string"
+                }
+            }
+        },
+        "nexus-video-games_internal_model.WebResponse-nexus-video-games_internal_model_DashboardStatsResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/nexus-video-games_internal_model.DashboardStatsResponse"
+                },
+                "errors": {
+                    "type": "string"
+                }
+            }
+        },
+        "nexus-video-games_internal_model.WebResponse-nexus-video-games_internal_model_LaunchGameResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/nexus-video-games_internal_model.LaunchGameResponse"
+                },
+                "errors": {
+                    "type": "string"
+                }
+            }
+        },
+        "nexus-video-games_internal_model.WebResponse-nexus-video-games_internal_model_LoginResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/nexus-video-games_internal_model.LoginResponse"
+                },
+                "errors": {
+                    "type": "string"
+                }
+            }
+        },
+        "nexus-video-games_internal_model.WebResponse-nexus-video-games_internal_model_TopupResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/nexus-video-games_internal_model.TopupResponse"
+                },
+                "errors": {
+                    "type": "string"
+                }
+            }
+        },
+        "nexus-video-games_internal_model.WebResponse-nexus-video-games_internal_model_UserResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/nexus-video-games_internal_model.UserResponse"
+                },
+                "errors": {
+                    "type": "string"
+                }
+            }
+        },
+        "nexus-video-games_internal_model.WebResponse-string": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "string"
+                },
+                "errors": {
+                    "type": "string"
+                }
+            }
+        },
+        "nexus-video-games_internal_model.XenditInvoiceWebhookPayload": {
+            "type": "object",
+            "properties": {
+                "external_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "paid_amount": {
+                    "type": "integer"
+                },
+                "payer_email": {
+                    "type": "string"
+                },
+                "payment_method": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "Enter your token with the format: Bearer \u003cyour_jwt_token\u003e",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

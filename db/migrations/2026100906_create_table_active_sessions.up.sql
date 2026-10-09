@@ -4,6 +4,7 @@ CREATE TABLE active_sessions (
     external_game_id VARCHAR(100) NOT NULL,
     started_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    
     CONSTRAINT fk_session_must_be_owned 
         FOREIGN KEY (user_id, external_game_id) 
         REFERENCES games_owned(user_id, external_game_id) ON DELETE CASCADE,
