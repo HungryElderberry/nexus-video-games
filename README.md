@@ -337,3 +337,6 @@ Use the Swagger UI to run through the entire application lifecycle step-by-step.
 
 - Endpoint: `POST` `/api/v1/auth/logout`
 - _Result_: Safely invalidates the client session.
+
+Deployed URL: [https://nexus-video-games-production.up.railway.app](https://nexus-video-games-production.up.railway.app)
+Live Swagger documentation: [https://nexus-video-games-production.up.railway.app/swagger/index.html](https://nexus-video-games-production.up.railway.app/swagger/index.html)
